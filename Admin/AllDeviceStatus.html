@@ -1,0 +1,131 @@
+<div>
+    <div>
+      搜索ID：
+      <div class="layui-inline">
+        <input class="layui-input" name="id" id="SearchInput" autocomplete="off">
+      </div>
+      <button class="layui-btn" data-type="reload">搜索</button>
+    </div>
+
+    <table class="layui-hide" id="DeviceTable" lay-filter="DeviceTable"></table> 
+</div>
+
+<script type="text/html" id="ToolBar">
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script language="JavaScript">
+function myrefresh()
+{
+window.location.reload();
+}
+setTimeout('myrefresh()',60000); //指定60秒刷新一次
+</script> 
+<script>
+layui.use('table', function(){
+  var table = layui.table;
+  var loadIndex = layer.load(2, {
+            shade: [0.3, '#333']
+        });
+    jQuery.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../AllUserSDeviceStatus/Select",//url
+        //data: {PostData:PostData},
+        success:function(resultData){
+            //console.log("test");
+            loadIndex && layer.close(loadIndex);
+            result=jQuery.parseJSON(resultData);
+            console.log(result);//打印服务端返回的数据(调试用)
+            console.log(JSON.stringify(result.data));
+            //"{\"status\":0,\"status_information\":\"\\u83b7\\u53d6\\u8bbe\\u5907\\u72b6\\u6001\\u5217\\u8868\\u6210\\u529f\",\"data\":[[{\"ClientId\":\"123\",\"NowStatus\":\"online\",\"KeepAliveTime\":\"1\",\"OnlineTimeStamp\":\"2\",\"OfflineTimeStamp\":\"2\"}]]}"
+            layer.msg(result.status_information, {icon: 1});
+            if (parseInt(result.status) === 0) {
+                  //过滤数据
+                  TempRevData=result.data;
+                console.log(TempRevData);
+                  for(x in TempRevData){
+                      if(TempRevData[x]==null){
+                          return;
+                         }
+                    var newDate = new Date();
+					var JAN1970 = parseInt('83aa7e80',16); /* 1900年～1970年之间的时间秒数 */
+                    newDate.setTime(parseInt(TempRevData[x]['OnlineTimeStamp'],10)/ 1000 /1000);
+                    // 2014年6月18日 上午10:33:24 
+                    TempRevData[x]['OnlineTimeStamp']=newDate.toLocaleString();
+                    newDate.setTime(parseInt(TempRevData[x]['OfflineTimeStamp'],10)/1000/1000);
+                    // 2014年6月18日 上午10:33:24 
+                    TempRevData[x]['OfflineTimeStamp']=newDate.toLocaleString();
+                    //TempRevData[x]['ClientIp']这是服务端的原始ip
+                    var tempAddrTable=TempRevData[x]['ClientIp'].split(":");
+                    TempRevData[x]['ClientIp']=tempAddrTable[0];
+                    TempRevData[x]['ClientPort']=tempAddrTable[1];
+                      jQuery.ajax({
+                          //几个参数需要注意一下
+                          type: "POST",//方法类型
+                          dataType: "text",//预期服务器返回的数据类型
+                          url: "../IpToPlace/Index",//url
+                          async:false,
+                          data: {Ip:tempAddrTable[0]},
+                          success: function (revData) {
+                              TempRevData[x]['ClientPlace']=revData;
+                          }
+                      });
+
+                    if (TempRevData[x]['NowStatus']=="Online"){
+                        TempRevData[x]['NowStatus']="在线";
+                    }else{
+                        TempRevData[x]['NowStatus']="离线";
+                    }
+                    
+                  }
+                  //方法级渲染
+                  table.render({
+                    elem: '#DeviceTable'
+                    //,url: '../UserSDevice/Select'
+                    ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                    ,cols: [[
+                      {checkbox: true, fixed: true}
+                      ,{field:'ClientId', title: 'ID', sort: true, fixed: true}
+                      ,{field:'NowStatus', title: '设备状态', sort: true}
+                      ,{field:'KeepAliveTime', title: '设备心跳时间(秒)', sort: true}
+                      ,{field:'ClientPlace', title: '设备所在地', sort: true}
+                      ,{field:'OnlineTimeStamp', title: '设备上线时间', sort: true}
+                      ,{field:'OfflineTimeStamp', title: '设备下线时间', sort: true}
+                    ]]
+                    ,id: 'SearchInput'
+                    ,data: TempRevData
+                    ,page: true
+                  });
+            }else{
+                loadIndex && layer.close(loadIndex);
+            }
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+  var $ = layui.$, active = {
+    reload: function(){
+      var SearchInput = $('#SearchInput');
+      
+      //执行重载
+      table.reload('SearchInput', {
+        page: {
+          curr: 1 //重新从第 1 页开始
+        }
+        ,where: {
+          key: {
+            id: SearchInput.val()
+          }
+        }
+      });
+    }
+  };
+  
+  $('.DeviceTable .layui-btn').on('click', function(){
+    var type = $(this).data('type');
+    active[type] ? active[type].call(this) : '';
+  });
+});
+</script>

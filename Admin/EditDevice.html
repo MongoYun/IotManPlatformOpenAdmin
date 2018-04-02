@@ -1,0 +1,89 @@
+<div>
+    <form class="layui-form" action="">
+      <div class="layui-form-item">
+        <label class="layui-form-label">设备Id</label>
+        <div class="layui-input-block">
+          <input type="text" name="DeviceId" required  lay-verify="required" placeholder="请输入设备连接时的设备Id" autocomplete="off" class="layui-input">
+          <div class="layui-form-mid layui-word-aux">英文，数字和英文符号</div>
+        </div>
+      </div>
+
+      <div class="layui-form-item">
+        <label class="layui-form-label">设备用户名</label>
+        <div class="layui-input-block">
+          <input type="text" name="DeviceUsername" required  lay-verify="required" placeholder="请输入设备连接时的用户名" autocomplete="off" class="layui-input">
+          <div class="layui-form-mid layui-word-aux">英文，数字和英文符号</div>
+        </div>
+
+      </div>
+
+      <div class="layui-form-item">
+        <label class="layui-form-label">设备密码</label>
+        <div class="layui-input-block"><!--inline-->
+          <input type="password" name="DevicePassword" required lay-verify="required" placeholder="请输入设备连接时的密码" autocomplete="off" class="layui-input">
+          <div class="layui-form-mid layui-word-aux">英文，数字和英文符号</div>
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <div class="layui-input-block">
+          <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="AddDeviceForm">立即提交</button>
+        </div>
+      </div>
+    </form>
+ </div>
+<script>
+//Demo
+
+layui.use(['layer', 'form'], function(){
+  var layer = layui.layer
+  var form = layui.form;
+    //自定义验证规则
+    /*
+    form.verify({
+    nikename: function (value) {
+        if (value.length < 5) {
+        return '昵称至少得5个字符啊';
+        }
+    }
+    , pass: [/(.+){6,12}$/, '密码必须6到12位']
+    , repass: function (value) {
+        if ($('#L_pass').val() != $('#L_repass').val()) {
+        return '两次密码不一致';
+        }
+    }
+    */
+  //监听提交
+  form.on('submit(AddDeviceForm)', function(data){
+    //layer.msg(JSON.stringify(data.field));
+    var PostData=JSON.stringify(data.field);
+    //console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+    var loadIndex = layer.load(2, {
+                shade: [0.3, '#333']
+            });
+    $.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../UserSDevice/Add",//url
+        data: {PostData:PostData},
+        success:function(result){
+            //console.log("test");
+            //console.log(result);//打印服务端返回的数据(调试用)
+            //=$.parseJSON(
+            loadIndex && layer.close(loadIndex);
+            layer.msg(result.status_information, {icon: 1});
+            if (parseInt(result.status) === 0) {
+                setTimeout(function () {
+                    window.location.href="#";
+                }, 1500);
+            }else{
+            }
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+    return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+  });
+});
+</script>

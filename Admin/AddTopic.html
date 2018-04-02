@@ -1,0 +1,437 @@
+<div>
+    <form class="layui-form" action="" id="AddTopicForm">
+      <div class="layui-form-item">
+        <label class="layui-form-label">主题名</label>
+        <div class="layui-input-inline">
+          <input type="text" name="TopicName" id="TopicName" required  lay-verify="required" placeholder="请输入设备推送和订阅时的主题名" autocomplete="off" class="layui-input">
+          <div class="layui-form-mid layui-word-aux">英文，数字和英文符号</div>
+        </div>
+          <button class="layui-btn" id="AddTopicFormBtn" lay-submit lay-filter="AddTopicFormBtn">添加主题</button>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">设备绑定主题列表</label>
+        <div class="layui-input-block"><!--inline-->
+            <div>
+                <table class="layui-hide" id="DeviceTable" lay-filter="DeviceTable"></table> 
+            </div>
+        </div>
+      </div>
+
+    </form>
+ </div>
+<script>
+//Demo
+
+layui.use(['layer', 'form','table'], function(){
+  var layer = layui.layer;
+  var form = layui.form;
+  var table = layui.table;
+    //自定义验证规则
+    /*
+    form.verify({
+    nikename: function (value) {
+        if (value.length < 5) {
+        return '昵称至少得5个字符啊';
+        }
+    }
+    , pass: [/(.+){6,12}$/, '密码必须6到12位']
+    , repass: function (value) {
+        if ($('#L_pass').val() != $('#L_repass').val()) {
+        return '两次密码不一致';
+        }
+    }
+    */
+
+  //监听提交
+  form.on('submit(AddTopicFormBtn)', function(data){
+    //layer.msg(JSON.stringify(data.field));
+    var PostData=JSON.stringify({TopicName:$("#TopicName").val()});
+    //console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+    var loadIndex = layer.load(2, {
+                shade: [0.3, '#333']
+            });
+    $.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../UserSDeviceTopic/AddTopicName",//url
+        data: {PostData:PostData},
+        success:function(result){
+            //console.log("test");
+            //console.log(result);//打印服务端返回的数据(调试用)
+            //=$.parseJSON(
+            loadIndex && layer.close(loadIndex);
+            //layer.msg(result.status_information, {icon: 1});
+            layer.msg("当前主题已添加-请在下面的列表绑定设备即可添加成功", {icon: 1});
+            if (parseInt(result.status) === 0) {
+                $("#TopicName").prop('disabled', true);
+                $("#AddTopicFormBtn").prop('disabled', true);
+                //$("#AddTopicFormBtn").value=result.status_information;
+                setTimeout(function () {
+                    loadIndex && layer.close(loadIndex);
+                    //window.location.href="#";
+                }, 3000);
+            }else{
+            }
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+    return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+  });
+
+  var loadIndex = layer.load(2, {
+            shade: [0.3, '#333']
+        });
+    jQuery.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../UserSDevice/Select",//url
+        //data: {PostData:PostData},
+        success:function(resultData){
+            //console.log("test");
+            loadIndex && layer.close(loadIndex);
+            result=jQuery.parseJSON(resultData);
+            console.log(result);//打印服务端返回的数据(调试用)
+            console.log(JSON.stringify(result.data));
+            //"{\"status\":0,\"status_information\":\"\\u83b7\\u53d6\\u8bbe\\u5907\\u72b6\\u6001\\u5217\\u8868\\u6210\\u529f\",\"data\":[[{\"ClientId\":\"123\",\"NowStatus\":\"online\",\"KeepAliveTime\":\"1\",\"OnlineTimeStamp\":\"2\",\"OfflineTimeStamp\":\"2\"}]]}"
+            layer.msg(result.status_information, {icon: 1});
+            if (parseInt(result.status) === 0) {
+                  //方法级渲染
+                  table.render({
+                    elem: '#DeviceTable'
+                    //,url: '../UserSDevice/Select'
+                    ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                    ,cols: [[
+                      {checkbox: true, fixed: true}
+                      ,{field:'DeviceId', title: 'ID', sort: true, fixed: true}
+                      ,{field:'DeviceUserName', title: '设备用户名', sort: true}
+                      ,{field:'Subscribe', title: '订阅权限',templet:'#SubscribeBtn',width: 130}
+                      ,{field:'Publish', title: '推送权限',templet:'#PublishBtn',width: 130}
+                      ,{field:'SubscribeQos', title: '订阅Qos',templet:'#SubscribeQos',width: 300}
+                    ]]
+                    //,id: 'SearchInput'
+                    ,data: result.data
+                    ,page: true
+                    ,done: function(res, curr, count){
+                        //如果是异步请求数据方式，res即为你接口返回的信息。
+                        //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+                        console.log(res);
+                        //得到当前页码
+                        console.log(curr); 
+                        //得到数据总量
+                        console.log(count);
+                  }
+                });
+            }else{
+                loadIndex && layer.close(loadIndex);
+            }
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+  var $ = layui.$, active = {
+    reload: function(){
+    }
+  };
+  //监听订阅操作
+  form.on('checkbox(Subscribe)', function(obj){
+      if($("#TopicName").val()==""){
+        SubscribeCheckBox=$("#Subscribe-"+this.value);
+        SubscribeCheckBox.prop("checked",false);
+        layer.msg("请先检验主题！！", {icon: 1});
+        setTimeout(function () {
+            loadIndex && layer.close(loadIndex);
+            //window.location.href="#";
+        }, 1500);
+        return;
+      }
+    //layer.tips(this.value +$("#TopicName").val()+ ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+    if(obj.elem.checked){
+        $TempCOntrol="1";
+      }else{
+        $TempCOntrol="0";
+      }
+        TempPostData={
+            TopicName:$("#TopicName").val()
+            ,DeviceId:this.value
+            ,Control:$TempCOntrol
+        };
+        PostData=JSON.stringify(TempPostData);
+        jQuery.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../UserSDeviceTopic/SaveDeviceToSubTopicControl",//url
+        data: {PostData:PostData},
+        success:function(result){
+            //console.log("test");
+            loadIndex && layer.close(loadIndex);
+            //result=jQuery.parseJSON(resultData);
+            console.log(result);//打印服务端返回的数据(调试用)
+            layer.msg(result.status_information, {icon: 1});
+            
+            if (parseInt(result.status) === 0) {
+                
+            }else{
+            }
+            setTimeout(function () {
+                    loadIndex && layer.close(loadIndex);
+                    //window.location.href="#";
+                }, 1500);
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+  });
+  //监听推送操作
+  form.on('checkbox(Publish)', function(obj){
+    //layer.tips(this.value +$("#TopicName").val()+ ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+      if($("#TopicName").val()==""){
+        PublishCheckBox=$("#Publish-"+this.value);
+        PublishCheckBox.prop("checked",false);
+        layer.msg("请先检验主题！！", {icon: 1});
+        setTimeout(function () {
+            loadIndex && layer.close(loadIndex);
+            //window.location.href="#";
+        }, 1500);
+          return;
+      }
+      if(obj.elem.checked){
+        $TempCOntrol="1";
+      }else{
+        $TempCOntrol="0";
+      }
+        TempPostData={
+            TopicName:$("#TopicName").val()
+            ,DeviceId:this.value
+            ,Control:$TempCOntrol
+        };
+        PostData=JSON.stringify(TempPostData);
+        jQuery.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../UserSDeviceTopic/SaveDeviceToPubTopicControl",//url
+        data: {PostData:PostData},
+        success:function(result){
+            //console.log("test");
+            loadIndex && layer.close(loadIndex);
+            //result=jQuery.parseJSON(resultData);
+            console.log(result);//打印服务端返回的数据(调试用)
+            layer.msg(result.status_information, {icon: 1});
+            if (parseInt(result.status) === 0) {
+            }else{
+            }
+            setTimeout(function () {
+                    loadIndex && layer.close(loadIndex);
+                    //window.location.href="#";
+                }, 1500);
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+  });
+  //监听qos0操作
+  form.on('checkbox(SubscribeQos0)', function(obj){
+      if($("#TopicName").val()==""){
+        qos0CheckBox=$("#Qos0-"+this.value);
+        qos0CheckBox.prop("checked",false);
+        layer.msg("请先检验主题！！", {icon: 1});
+        setTimeout(function () {
+            loadIndex && layer.close(loadIndex);
+            //window.location.href="#";
+        }, 1500);
+          return;
+      }
+    //layer.tips(this.value +$("#TopicName").val()+ ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+        if(obj.elem.checked){
+            $TempQos="0";
+            qos1CheckBox=$("#Qos1-"+this.value);
+            qos1CheckBox.prop("checked", false);
+            qos2CheckBox=$("#Qos2-"+this.value);
+            qos2CheckBox.prop("checked",false);
+          }else{
+            $TempQos="2";
+            qos1CheckBox=$("#Qos1-"+this.value);
+            qos1CheckBox.prop("checked", false);
+            qos2CheckBox=$("#Qos2-"+this.value);
+            qos2CheckBox.prop("checked", true);
+          }
+        form.render();//更新渲染
+        TempPostData={
+            TopicName:$("#TopicName").val()
+            ,DeviceId:this.value
+            ,Qos:$TempQos
+        };
+        PostData=JSON.stringify(TempPostData);
+        jQuery.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../UserSDeviceTopic/SaveDeviceToSubTopicControlQosLevel",//url
+        data: {PostData:PostData},
+        success:function(result){
+            //console.log("test");
+            loadIndex && layer.close(loadIndex);
+            //result=jQuery.parseJSON(resultData);
+            console.log(result);//打印服务端返回的数据(调试用)
+            layer.msg(result.status_information, {icon: 1});
+            
+            if (parseInt(result.status) === 0) {
+                
+            }else{
+            }
+            setTimeout(function () {
+                    loadIndex && layer.close(loadIndex);
+                    //window.location.href="#";
+                }, 1500);
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+      
+  });
+  //监听qos1操作
+  form.on('checkbox(SubscribeQos1)', function(obj){
+      if($("#TopicName").val()==""){
+        qos1CheckBox=$("#Qos1-"+this.value);
+        qos1CheckBox.prop("checked",false);
+        layer.msg("请先检验主题！！", {icon: 1});
+        setTimeout(function () {
+            loadIndex && layer.close(loadIndex);
+            //window.location.href="#";
+        }, 1500);
+        return;
+      }
+    //layer.tips(this.value +$("#TopicName").val()+ ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+    if(obj.elem.checked){
+            $TempQos="1";
+            qos0CheckBox=$("#Qos0-"+this.value);
+            qos0CheckBox.prop("checked", false);
+            qos2CheckBox=$("#Qos2-"+this.value);
+            qos2CheckBox.prop("checked",false);
+          }else{
+            $TempQos="2";
+            qos0CheckBox=$("#Qos0-"+this.value);
+            qos0CheckBox.prop("checked", false);
+            qos2CheckBox=$("#Qos2-"+this.value);
+            qos2CheckBox.prop("checked",true);
+          }
+        TempPostData={
+            TopicName:$("#TopicName").val()
+            ,DeviceId:this.value
+            ,Qos:$TempQos
+        };
+        PostData=JSON.stringify(TempPostData);
+        jQuery.ajax({
+        //几个参数需要注意一下 
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "../UserSDeviceTopic/SaveDeviceToSubTopicControlQosLevel",//url
+        data: {PostData:PostData},
+        success:function(result){
+            //console.log("test");
+            loadIndex && layer.close(loadIndex);
+            //result=jQuery.parseJSON(resultData);
+            console.log(result);//打印服务端返回的数据(调试用)
+            layer.msg(result.status_information, {icon: 1});
+            
+            if (parseInt(result.status) === 0) {
+                
+            }else{
+            }
+            setTimeout(function () {
+                    loadIndex && layer.close(loadIndex);
+                    //window.location.href="#";
+                }, 1500);
+        },
+        error : function() {
+            layer.msg("网络异常！");
+        }
+    });
+  });
+  //监听qos2操作
+  form.on('checkbox(SubscribeQos2)', function(obj){
+      if($("#TopicName").val()==""){
+        qos2CheckBox=$("#Qos2-"+this.value);
+        qos2CheckBox.prop("checked",false);
+        layer.msg("请先检验主题！！", {icon: 1});
+        setTimeout(function () {
+            loadIndex && layer.close(loadIndex);
+            //window.location.href="#";
+        }, 1500);
+        return;
+      }
+    //layer.tips(this.value +$("#TopicName").val()+ ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+    if(obj.elem.checked){
+        $TempQos="2";
+      }else{
+        $TempQos="2";
+        qos2CheckBox=$("#Qos2-"+this.value);
+        qos2CheckBox.prop("checked",true);
+      }
+        qos0CheckBox=$("#Qos0-"+this.value);
+        qos0CheckBox.prop("checked", false);
+        qos1CheckBox=$("#Qos1-"+this.value);
+        qos1CheckBox.prop("checked",false);
+    TempPostData={
+        TopicName:$("#TopicName").val()
+        ,DeviceId:this.value
+        ,Qos:$TempQos
+    };
+    PostData=JSON.stringify(TempPostData);
+    jQuery.ajax({
+    //几个参数需要注意一下 
+    type: "POST",//方法类型
+    dataType: "json",//预期服务器返回的数据类型
+    url: "../UserSDeviceTopic/SaveDeviceToSubTopicControlQosLevel",//url
+    data: {PostData:PostData},
+    success:function(result){
+        //console.log("test");
+        loadIndex && layer.close(loadIndex);
+        //result=jQuery.parseJSON(resultData);
+        console.log(result);//打印服务端返回的数据(调试用)
+        layer.msg(result.status_information, {icon: 1});
+
+        if (parseInt(result.status) === 0) {
+
+        }else{
+        }
+        setTimeout(function () {
+                loadIndex && layer.close(loadIndex);
+                //window.location.href="#";
+            }, 1500);
+    },
+    error : function() {
+        layer.msg("网络异常！");
+    }
+});
+  });
+  $('.DeviceTable .layui-btn').on('click', function(){
+    var type = $(this).data('type');
+    active[type] ? active[type].call(this) : '';
+  });
+});
+</script>
+
+<script type="text/html" id="SubscribeBtn">
+  <!-- 这里的 checked 的状态只是演示 -->
+  <input type="checkbox" name="Subscribe" id="Subscribe-{{d.DeviceId}}" value="{{d.DeviceId}}" title="订阅" lay-filter="Subscribe" {{ d.SubscribeStatus == 1 ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="PublishBtn">
+  <!-- 这里的 checked 的状态只是演示 -->
+  <input type="checkbox" name="Publish" id="Publish-{{d.DeviceId}}" value="{{d.DeviceId}}" title="发布" lay-filter="Publish" {{ d.PublishStatus == 1 ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="SubscribeQos">
+      <!-- 这里的 checked 的状态只是演示 -->
+    <input type="checkbox" name="SubscribeQos0" id="Qos0-{{d.DeviceId}}" value="{{d.DeviceId}}" title="Qos0" lay-filter="SubscribeQos0" {{ d.SubscribeQos0Status == 1 ? 'checked' : '' }}>
+    <input type="checkbox" name="SubscribeQos1" id="Qos1-{{d.DeviceId}}" value="{{d.DeviceId}}" title="Qos1" lay-filter="SubscribeQos1" {{ d.SubscribeQos1Status == 1 ? 'checked' : '' }}>
+    <input type="checkbox" name="SubscribeQos2" id="Qos2-{{d.DeviceId}}" value="{{d.DeviceId}}" title="Qos2" lay-filter="SubscribeQos2" {{ d.SubscribeQos2Status == 1 ? 'checked' : '' }}>
+</script>

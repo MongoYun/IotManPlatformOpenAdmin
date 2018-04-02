@@ -1,0 +1,137 @@
+<div>
+    <div>
+        搜索ID：
+        <div class="layui-inline">
+            <input class="layui-input" name="id" id="SearchInput" autocomplete="off">
+        </div>
+        <button class="layui-btn" data-type="reload">搜索</button>
+    </div>
+
+    <table class="layui-hide" id="DeviceTable" lay-filter="DeviceTable"></table>
+</div>
+<script type="text/html" id="ToolBar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+
+<script src="../style/plugins/layui/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script>
+    layui.use('table', function () {
+        var table = layui.table;
+        var loadIndex = layer.load(2, {
+            shade: [0.3, '#333']
+        });
+        jQuery.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "../UserSDevice/Select",//url
+            //data: {PostData:PostData},
+            success: function (resultData) {
+                //console.log("test");
+                loadIndex && layer.close(loadIndex);
+                result = jQuery.parseJSON(resultData);
+                console.log(result);//打印服务端返回的数据(调试用)
+                //console.log(JSON.stringify(result.data));
+
+                layer.msg(result.status_information, {icon: 1});
+                if (parseInt(result.status) === 0) {
+                    //方法级渲染
+                    table.render({
+                        elem: '#DeviceTable'
+                        //,url: '../UserSDevice/Select'
+                        , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                        , cols: [[
+                            {checkbox: true, fixed: true}
+                            , {field: 'DeviceId', title: 'ID', sort: true, fixed: true}
+                            , {field: 'DeviceUserName', title: '设备用户名', sort: true}
+                            , {align: 'center', toolbar: '#ToolBar'}
+                        ]]
+                        , id: 'SearchInput'
+                        , data: result.data
+                        , page: true
+                    });
+                } else {
+                    loadIndex && layer.close(loadIndex);
+                }
+            },
+            error: function () {
+                layer.msg("网络异常！");
+            }
+        });
+        //监听工具条
+        table.on('tool(DeviceTable)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    var PostData = JSON.stringify(data);
+		    var loadIndex = layer.load(2, {
+            		shade: [0.3, '#333']
+        		});
+                    jQuery.ajax({
+                        //几个参数需要注意一下
+                        type: "POST",//方法类型
+                        dataType: "json",//预期服务器返回的数据类型
+                        url: "../UserSDevice/Delete",//url
+                        data: {PostData: PostData},
+                        success: function (result) {
+                            //console.log("test");
+
+                            //result = jQuery.parseJSON(resultData);
+                            console.log(result);//打印服务端返回的数据(调试用)
+                            //console.log(JSON.stringify(result.data));
+                            loadIndex && layer.close(loadIndex);
+                            layer.msg(result.status_information, {icon: 1});
+                            if (parseInt(result.status) === 0) {
+                                var SearchInput = $('#SearchInput');
+
+                                //执行重载
+                                table.reload('SearchInput', {
+                                    page: {
+                                        curr: 1 //重新从第 1 页开始
+                                    }
+                                    , where: {
+                                        key: {
+                                            id: SearchInput.val()
+                                        }
+                                    }
+                                });
+                            } else {
+                            }
+                        },
+                        error: function () {
+                            layer.msg("网络异常！");
+                        }
+                    });
+                    obj.del();
+                    layer.close(index);
+                });
+            }
+        });
+        var $ = layui.$, active = {
+            reload: function () {
+                var SearchInput = $('#SearchInput');
+
+                //执行重载
+                table.reload('SearchInput', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        key: {
+                            id: SearchInput.val()
+                        }
+                    }
+                });
+            }
+        };
+
+        $('.DeviceTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+</script>
