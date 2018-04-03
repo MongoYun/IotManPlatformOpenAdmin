@@ -15,3 +15,7 @@ typora-root-url: Photo
 ## 查看在线状态
 
 ![AdminDeviceStatus](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/AdminDeviceStatus.png)
+
+## 增加设备
+
+![AddUserSDevice](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/AddUserSDevice.png)
