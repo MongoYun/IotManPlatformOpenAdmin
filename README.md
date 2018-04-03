@@ -19,3 +19,19 @@ typora-root-url: Photo
 ## 增加设备
 
 ![AddUserSDevice](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/AddUserSDevice.png)
+
+## 编辑设备
+
+![EditeDevice](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/EditeDevice.png)
+
+## 增加主题
+
+![AddUserSTopic](/AddUserSTopic.png)
+
+## 编辑主题
+
+![EditeTopic](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/EditeTopic.png)
+
+## 删除主题
+
+![DeleteUserSTopic](/DeleteUserSTopic.png)
