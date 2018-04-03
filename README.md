@@ -6,12 +6,12 @@ typora-root-url: Photo
 
 ## 登录页面
 
-![Login](/Login.png)
+![Login](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/Login.png)
 
 ## 后台首页
 
-![Admin](/Admin.png)
+![Admin](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/Admin.png)
 
 ## 查看在线状态
 
-![AdminDeviceStatus](/AdminDeviceStatus.png)
+![AdminDeviceStatus](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/AdminDeviceStatus.png)
