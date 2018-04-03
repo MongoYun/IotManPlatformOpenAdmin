@@ -26,7 +26,7 @@ typora-root-url: Photo
 
 ## 增加主题
 
-![AddUserSTopic](/AddUserSTopic.png)
+![AddUserSTopic](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/AddUserSTopic.png)
 
 ## 编辑主题
 
@@ -34,4 +34,4 @@ typora-root-url: Photo
 
 ## 删除主题
 
-![DeleteUserSTopic](/DeleteUserSTopic.png)
+![DeleteUserSTopic](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Photo/DeleteUserSTopic.png)
