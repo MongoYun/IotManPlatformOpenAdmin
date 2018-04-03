@@ -4,7 +4,7 @@ typora-root-url: Photo
 
 # IotMan开源后台
 
-## [点击查看说明文档](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/raw/master/Api.md)
+## [点击查看说明文档](https://github.com/IotManPlatform/IotManPlatformOpenAdmin/blob/master/Api.md)
 
 ## 后台截图
 ### 登录页面
