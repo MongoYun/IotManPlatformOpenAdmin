@@ -7,7 +7,7 @@
 ### POST参数名:PostData
 ### POST参数值:JSON结构。
 ### JSON节点名:UserName和PassWord
-### 例子：curl /User/Login/ --data 
+### 例子：curl "http://iotman.cnxel.cn/User/Login" -H "Host: iotman.cnxel.cn" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" --data "Username=test&Password=Password&Captcha=ezzw"
 
 ## 获取登录验证码
 ### 地址:/User/LoginAuthCode
@@ -24,7 +24,7 @@
 ### 例子：curl "http://iotman.cnxel.cn/User/Login_status" -H "Host: iotman.cnxel.cn" -H "Cookie: PHPSESSID=6md56mr8fog0iuor067g44aek2" --data ""
 ### 返回登录状态，用户名和qq
 
-## 添加设备
+## 增加设备
 ### 地址:/UserSAddDevice/Add
 ### 请求方式:POST
 ### 详情:
@@ -32,5 +32,5 @@
 ### POST参数值:JSON结构。
 ### JSON节点名:DeviceId，DeviceUserName和DevicePasswd
 ### 例子：curl "http://iotman.cnxel.cn/UserSDevice/Add" -H "Host: iotman.cnxel.cn" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8"  -H "Cookie: PHPSESSID=6md56mr8fog0iuor067g44aek2" --data "PostData={"DeviceId":"test","DeviceUsername":"test","DevicePassword":"test"}"
-### 返回增加状态
+### 返回增加设备状态
 
