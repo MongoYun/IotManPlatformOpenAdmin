@@ -1,13 +1,33 @@
 # IotMan物联平台后台Api说明
 
+## 用户注册
+### 地址:/User/zc
+### 请求方式:POST
+### 详情:
+<!--POST参数名:phone_number、Password、Password_repaet、Captcha和validCode_SMS-->
+<!--POST参数值:form结构。-->
+### 例子：
+```
+curl "http://iotman.cnxel.cn/User/zc" -H "Host: iotman.cnxel.cn" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" --data "phone_number=手机号码&Password=Password&Password_repaet=重复密码&Captcha=图片验证码&validCode_SMS=手机验证码"
+```
+
+## 获取手机验证码
+### 地址:/User/Register_verification_code
+### 请求方式:POST
+### 详情:
+<!--POST参数名:phone_number和Captcha-->
+<!--POST参数值:form结构。-->
+### 例子：
+```
+curl "http://iotman.cnxel.cn/User/Register_verification_code" -H "Host: iotman.cnxel.cn" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" --data "phone_number=手机号码&Captcha=图片验证码"
+```
+
 ## 用户登陆
 ### 地址:/User/Login/
 ### 请求方式:POST
 ### 详情:
-### POST参数名:UserName和PassWord
-<!--POST参数名:PostData-->
-<!--POST参数值:JSON结构。-->
-<!--JSON节点名:UserName和PassWord-->
+<!--POST参数名:UserName、Captcha和Password-->
+<!--POST参数值:form结构。-->
 ### 例子：
 ```
 curl "http://iotman.cnxel.cn/User/Login" -H "Host: iotman.cnxel.cn" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" --data "Username=test&Password=Password&Captcha=ezzw"
